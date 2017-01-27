@@ -1,0 +1,15 @@
+extends layout
+
+block content
+
+	each message in messages
+			form(action='/get_data/edit_data',method='post')
+				div.input
+					input(name="id" value=message._id)
+				div.input
+					label=message.message
+					br
+					input(name="type" value=message.type)
+				input(type="submit" , value="Edit")
+				br
+				br
