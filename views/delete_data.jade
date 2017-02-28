@@ -1,0 +1,14 @@
+extends layout
+
+block content
+
+	each message in messages
+			form(action='/get_data/delete_data',method='post')
+				div.input
+					input(name="id" value=message._id)
+				div.input
+					label=message.message
+					br
+				input(type="submit" , value="Delete")
+				br
+				br

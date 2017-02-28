@@ -2,14 +2,18 @@ extends layout
 
 block content
 
-	each message in messages
+	each item in items
 			form(action='/get_data/edit_data',method='post')
 				div.input
-					input(name="id" value=message._id)
+					input(name="id" value=item._id)
 				div.input
-					label=message.message
+					label=item.message
 					br
-					input(name="type" value=message.type)
+					input(name="message" value=item.message)
+					br
+					input(name="type" value=item.type)
+					br
+					input(name="vec" value=item.vec)
 				input(type="submit" , value="Edit")
 				br
 				br
