@@ -356,7 +356,7 @@ var stringUrl2 = [
 
 
 
-var stringAccessToken = "EAACEdEose0cBAFkzV0p2Jo569nm0Pfp72LcmrbchIpONWeZBN4jtgEAJpxornLuNMv5PLlZC9mCEbSpg4wlocb6Np5PKKmw8oXHwQRBV8y9zSWDlp95yt9lwMTKxwZBUZC0266PZCpzGm7HktDoI4DO5TMumDC6Fewvyp8XkBg04GMvLJiIKiWYVqtAmo28AZD";
+var stringAccessToken = "EAACEdEose0cBALucziJaZA4QrqiI6uG0V1f7gBnD2jzqBBkC10JTEN3aaFqZA5ouwZB3465Et9pfCoAIQt93yto3jSZA9JQLPhoLml1cdhDHAvAZAfLj2gCtbMOs1D7HKZBKnojhQTNsdChVrSFicjd5Uov3WUMYAiZCUT1XcVPSjOWEZATiS0zJZCz1PCw8HyrwZD";
 /* GET home page. */
 router.get('/', function(req, res, next) {
   res.render('index', { title: 'Express' });
@@ -386,6 +386,7 @@ router.get('/call_data_from_graph',function(req,res){
 					// var message = new Message();
 					// message.message = results[i][j].message;
 					// message.type = 'tmp';
+					// message.date = new Date(results[i][j].created_time);
 					// message.save().then(
 					// 	function(err){
 					// 		res.send(err);
@@ -395,6 +396,7 @@ router.get('/call_data_from_graph',function(req,res){
 				}
 				// text += "\n\n\n\n\n"
 			}
+			// console.log("length : " + results.length);
 			res.send(results);
 		}
 	)
@@ -591,7 +593,7 @@ function decode(str) {
 // });
 
 router.get('/get_data',function(req,res){
-	Message.find().limit(5).then(
+	Message.find().limit(600).then(
 		function(message){
 			console.log(message.length);
 			res.send(message);
@@ -626,7 +628,12 @@ router.post('/get_data/edit_data',function(req,res){
 			message.type = req.body.type;
 			message.vec = req.body.vec;
 			message.save().then(function(message){
-				                res.redirect('/get_data/edit_data');
+				                // res.redirect('/get_data/edit_data');
+				                res.status(200).send({
+				                	success: true,
+				                	status: 'update data complete',
+				                	message: 'update data complete'
+				                })
 				            },function(err){
 				                res.status(400).send({
 									success: false,
@@ -648,15 +655,55 @@ router.post('/get_data/edit_data',function(req,res){
 router.get('/get_data/delete_data',function(req,res){
 	Message.find({
 		// type: { $nin: ['news', 'review', 'advertisement', 'event'] }
+		message:{$exists: false} 
 	}).then(
 		function(message){
 			// res.send(message);
-			res.render('delete_data', { messages: message });
+			// res.render('delete_data', { messages: message });
+			var len3 = message.length;
+			delete_list_data(message,0,len3);
+
 		},function(err){
 			res.send(err);
 		}
 	);
 });
+router.get('/get_data/show_empty_string',function(req,res){
+	Message.find({
+		message:{$exists: false} 
+	}).then(
+		function(message){
+			res.send(message);
+		},function(err){
+			res.send(err);
+		}
+	);
+});
+
+
+function delete_list_data(messages,i,len3){
+	if(i==len3){
+		console.log("complete");
+		res.redirect('/get_data');
+	}
+	Message.findOne({
+		_id:messages[i]._id
+	}).then(
+		function(message){
+			// console.log(message);
+			console.log("i value : " + i);
+			message.delete().then(function(message){
+				                i++;
+				                delete_list_data(messages,i,len3);
+				            },function(err){
+				                console.log(err);
+				            });
+		},
+		function(error){
+			console.log(error)
+		}
+	);
+}
 
 router.post('/get_data/delete_data',function(req,res){
 	// console.log("enter");
@@ -667,7 +714,12 @@ router.post('/get_data/delete_data',function(req,res){
 		function(message){
 			// console.log(message);
 			message.delete().then(function(message){
-				                res.redirect('/get_data/delete_data');
+				                // res.redirect('/get_data/delete_data');
+				                res.status(200).send({
+				                	success: true,
+				                	status: 'delete data success',
+				                	message: 'delete data success'
+				                });
 				            },function(err){
 				                res.status(400).send({
 									success: false,

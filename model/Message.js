@@ -6,7 +6,8 @@ var Schema = mongoose.Schema;
 var messageSchema = new Schema({
     message: String,
     type: String,
-    vec: String
+    vec: String,
+    date: { type: Date}
 },{
     timestamps: true,
     collection: 'messages'
