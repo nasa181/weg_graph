@@ -593,20 +593,25 @@ function decode(str) {
 // });
 
 router.get('/get_data',function(req,res){
-	Message.find().limit(600).then(
-		function(message){
-			console.log(message.length);
-			res.send(message);
-		},function(err){
-			res.send(err);
-		}
-	);
+	Message.find()
+		// .limit(600)
+		.then(
+			function(message){
+				console.log(message.length);
+				res.send(message);
+			},function(err){
+				res.send(err);
+			}
+		);
 });
 
 router.get('/get_data/edit_data',function(req,res){
 	Message.find({
 		type: { $nin: ['news', 'review', 'advertisement', 'event'] }
-	}).then(
+		// message:/.*อาหาร.*/
+	})
+	.limit(600)
+	.then(
 		function(messages){
 			// res.send(message);
 			res.render('edit_data', { items: messages });
@@ -627,6 +632,7 @@ router.post('/get_data/edit_data',function(req,res){
 			message.message = message.message;
 			message.type = req.body.type;
 			message.vec = req.body.vec;
+			message.tmp_type = req.body.tmp_type;
 			message.save().then(function(message){
 				                // res.redirect('/get_data/edit_data');
 				                res.status(200).send({

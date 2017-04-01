@@ -76,7 +76,7 @@ if __name__ == '__main__':
 # 			yield line
 # text = MySentences('word2') # a memory-friendly iterator
 
-# model = gensim.models.Word2Vec(text,min_count=0,size=100,sg=1)
+# model = gensim.models.Word2Vec(text,min_count=10,size=300,sg=1)
 # model.save('fifth_model')
 # =========================================================================================================================
 
@@ -121,7 +121,7 @@ if __name__ == '__main__':
 # r = r.json()
 # count = 0
 # for i in range(len(r)):
-# 	vec = np.array([0.0 for i in range(100)])
+# 	vec = np.array([0.0 for i in range(300)])
 # 	if 'message' in r[i]:
 # 		count += 1
 # 		tmp = str(r[i]['message'])
@@ -135,13 +135,13 @@ if __name__ == '__main__':
 # 		tmp = wordcut.tokenize(tmp)
 # 		if tmp is None:
 # 			continue
-# 		num_tokenize = len(tmp)
+# 		# num_tokenize = len(tmp)
 # 		for word in tmp:
 # 			if word in model.wv.vocab:
 # 				a = np.array(model[word])
 # 				vec += a
-# 		for j in range(100):
-# 			vec[j] = vec[j]/num_tokenize
+# 		# for j in range(100):
+# 		# 	vec[j] = vec[j]/num_tokenize
 # 		print("message : ",tmp," >>>  id : ",_id," >>> type : ",typ," >>> Avg vec : ",vec)
 # 		re = requests.post("http://localhost:3000/get_data/edit_data", data={'id':_id, 'type':typ, 'vec':vec})
 # 		print("count >>> ",count)
@@ -182,58 +182,127 @@ if __name__ == '__main__':
 
 # =========================================================================================================================
 # 
-# 	clustering k-mean (k == 4)
+# 	clustering k-mean (k == 4) 
+# 	save some example output to text file
+# 	assign temporary to each status in database
 # 
 # =========================================================================================================================
-import requests
-import json
-import numpy as np
-import numpy.random as npr
-import math
-from sklearn import cluster
+# import requests
+# import json
+# import numpy as np
+# import numpy.random as npr
+# import math
+# from sklearn import cluster
 
-def split_data(data,train_split=0.8):
-    data = np.array(data)
-    num_train = int(data.shape[0] * train_split)
-    # npr.shuffle(data)
+# def split_data(data,train_split=0.8):
+#     data = np.array(data)
+#     num_train = int(data.shape[0] * train_split)
+#     # npr.shuffle(data)
     
-    return (data[:num_train],data[num_train:])
+#     return (data[:num_train],data[num_train:])
 
 
-r = requests.get("http://localhost:3000/get_data")
-r = r.json()
-count = 0
-data = []
-data_id = []
-data_message = []
-for i in range(len(r)):
-	if 'vec' in r[i]:
-		count += 1
-		# print(count)
-		vec = r[i]['vec']
-		vec = vec.split(",")
-		vec = np.array(vec, dtype=np.float64)
-		vec = vec.astype(np.float)
-		data.append(vec)
-		# how to know the owner of the vector (which sentence is for which vector)
-		data_id.append(r[i]['_id'])
-		data_message.append(r[i]['message'])
-training_data,test_data = split_data(data)
+# r = requests.get("http://localhost:3000/get_data")
+# r = r.json()
+# count = 0
+# data = []
+# data_id = []
+# data_message = []
+# data_type = []
+# advertisement = 0
+# news = 0
+# event = 0
+# review = 0
+# f = open('result_k-mean_output','w')
+# for i in range(len(r)):
+# 	if 'vec' in r[i]:
+# 		count += 1
+# 		# print(count)
+# 		vec = r[i]['vec']
+# 		vec = vec.split(",")
+# 		vec = np.array(vec, dtype=np.float64)
+# 		vec = vec.astype(np.float)
+# 		data.append(vec)
+# 		typ = r[i]['type']
+# 		if typ == 'news':
+# 			news += 1
+# 		elif typ == 'advertisement':
+# 			advertisement += 1
+# 		elif typ == 'review':
+# 			review += 1
+# 		elif typ == 'event':
+# 			event += 1
+# 		# how to know the owner of the vector (which sentence is for which vector)
+# 		data_id.append(r[i]['_id'])
+# 		data_message.append(r[i]['message'])
+# 		data_type.append(typ)
+# training_data,test_data = split_data(data)
 
-kmeans = cluster.KMeans(n_clusters=4)
-kmeans.fit(data)
-results = kmeans.predict(data)
-group_count = [0,0,0,0]
-group_list = [[],[],[],[]]
-for i in range(len(results)):
-	group_count[results[i]] += 1
-	group_list[results[i]].append(i)
-print(group_count)
-for i in range(len(group_list)):
-	print(group_list[i])
-	print("\n\n\n >>> \n\n\n")
-for i in range(len(results)):
-	print("results ",i," : ",results[i]," >>> message : ",data_message[i])
+# kmeans = cluster.KMeans(n_clusters=4)
+# kmeans.fit(data)
+# results = kmeans.predict(data)
+# group_count = [0,0,0,0]
+# group_list = [[],[],[],[]]
+# for i in range(len(results)):
+# 	group_count[results[i]] += 1
+# 	group_list[results[i]].append(i)
+
+# print(group_count)
+# print("news : ",news," >>> advertisement : ",advertisement," >>> review : ",review," >>> event : ",event)
+# news_array = [0,0,0,0]
+# news_position = 0
+# advertisement_array = [0,0,0,0]
+# advertisement_position = 0
+# review_array = [0,0,0,0]
+# review_position = 0
+# event_array = [0,0,0,0]
+# event_position = 0
+
+# for i in range(len(data_type)):
+# 	if data_type[i] == 'news':
+# 		news_array[results[i]] += 1
+# 		news_position = results[i]
+# 	elif data_type[i] == 'advertisement':
+# 		advertisement_array[results[i]] += 1
+# 		advertisement_position = results[i]
+# 	elif data_type[i] == 'review':
+# 		review_array[results[i]] += 1
+# 		review_position = results[i]
+# 	elif data_type[i] == 'event':
+# 		event_array[results[i]] += 1
+# 		event_position = results[i]
+
+# # ================================================================================
+# # tmp_type = {}
+# # for i in range(4):
+# # 	mx = max(news_array[i],advertisement_array[i],review_array[i],event_array[i])
+# # 	if mx == news_array[i]:
+# # 		tmp_type[news_position] = 'news'
+# # 	elif mx == advertisement_array[i]:
+# # 		tmp_type[advertisement_position] = 'advertisement'
+# # 	elif mx == review_array[i]:
+# # 		tmp_type[review_position] = 'review'
+# # 	elif mx == event_array[i]:
+# # 		tmp_type[event_position] = 'event'
+# # 	# print(tmp_type[results[i]])
+# # print(tmp_type[0])	
+# # ================================================================================
+
+# print("news in 0 : ",news_array[0]," >>> advertisement in 0 : ",advertisement_array[0]," >>> review in 0 : ",review_array[0]," >>> event in 0 : ",event_array[0])
+# print('\n')
+# print("news in 1 : ",news_array[1]," >>> advertisement in 1 : ",advertisement_array[1]," >>> review in 1 : ",review_array[1]," >>> event in 1 : ",event_array[1])
+# print('\n')
+# print("news in 2 : ",news_array[2]," >>> advertisement in 2 : ",advertisement_array[2]," >>> review in 2 : ",review_array[2]," >>> event in 2 : ",event_array[2])
+# print('\n')
+# print("news in 3 : ",news_array[3]," >>> advertisement in 3 : ",advertisement_array[3]," >>> review in 3 : ",review_array[3]," >>> event in 3 : ",event_array[3])
+# print('\n')
+
+# for i in range(len(results)):
+# 	print("results ",i," : ",results[i]," >>> type : ",data_type[i]," >>> message : ",data_message[i],"\n\n\n")
+# 	f.write("results " + str(i) + " : " + str(results[i]) + " >>> type : " + data_type[i] + " >>> message : " + data_message[i] + "\n\n\n")
+# # 	re = requests.post("http://localhost:3000/get_data/edit_data", data={'id':data_id[i], 'type':data_type[i], 'vec':data[i], 'tmp_type':tmp_type[results[i]]})
+# f.close()
+
 # print("kmeans.predict(test_data) : ",kmeans.predict(test_data))
 # =========================================================================================================================
 

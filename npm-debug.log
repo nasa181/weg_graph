@@ -7,7 +7,7 @@
 6 silly lifecycle web@0.0.0~prestart: no script for prestart, continuing
 7 info lifecycle web@0.0.0~start: web@0.0.0
 8 verbose lifecycle web@0.0.0~start: unsafe-perm in lifecycle true
-9 verbose lifecycle web@0.0.0~start: PATH: /usr/local/lib/node_modules/npm/bin/node-gyp-bin:/Users/NASA181/Desktop/graph/web_graph/node_modules/.bin:/usr/local/bin:/Users/NASA181/anaconda/bin:/usr/local/bin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin
+9 verbose lifecycle web@0.0.0~start: PATH: /usr/local/lib/node_modules/npm/bin/node-gyp-bin:/Users/NASA181/Desktop/graph/web_graph/node_modules/.bin:/usr/local/bin:/Users/NASA181/anaconda/bin:/usr/local/bin:/usr/local/bin:/usr/bin:/bin:/usr/sbin:/sbin:/usr/local/MacGPG2/bin
 10 verbose lifecycle web@0.0.0~start: CWD: /Users/NASA181/Desktop/graph/web_graph
 11 silly lifecycle web@0.0.0~start: Args: [ '-c', 'node app.js' ]
 12 silly lifecycle web@0.0.0~start: Returned: code: 1  signal: null

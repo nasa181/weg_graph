@@ -7,7 +7,8 @@ var messageSchema = new Schema({
     message: String,
     type: String,
     vec: String,
-    date: { type: Date}
+    date: { type: Date},
+    tmp_type: String
 },{
     timestamps: true,
     collection: 'messages'
