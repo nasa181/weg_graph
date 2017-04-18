@@ -553,7 +553,7 @@ function decode(str) {
 
 router.get('/get_data',function(req,res){
 	Message.find()
-		// .limit(600)
+		// .limit(100)
 		.then(
 			function(message){
 				console.log(message.length);
@@ -590,10 +590,13 @@ router.post('/get_data/edit_data',function(req,res){
 	.then(
 		function(message){
 			// console.log(message);
-			message.message = message.message;
-			message.type = req.body.type;
-			message.vec = req.body.vec;
-			message.tmp_type = req.body.tmp_type;
+			// message.message = message.message;
+			// message.type = req.body.type;
+			// message.vec = req.body.vec;
+			// message.tmp_type = req.body.tmp_type;
+			// message.tmp_type_from_word = req.body.tmp_type_from_word;
+			// message.vec_from_word = req.body.vec_from_word;
+			message.vec_from_base_line = req.body.vec_from_base_line;
 			message.save().then(function(message){
 				                // res.redirect('/get_data/edit_data');
 				                res.status(200).send({

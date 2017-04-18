@@ -7,8 +7,11 @@ var messageSchema = new Schema({
     message: String,
     type: String,
     vec: String,
+    vec_from_word: String,
+    vec_from_base_line : String,
     date: { type: Date},
-    tmp_type: String
+    tmp_type: String,
+    tmp_type_from_word: String
 },{
     timestamps: true,
     collection: 'messages'
