@@ -420,7 +420,8 @@ logging.basicConfig(format='%(asctime)s : %(levelname)s : %(message)s', level=lo
 # =========================================================================================================================
 # 
 # 	training neural network
-# 	for Doc2Vec, Normal neural network with Backprop will be used
+# 	for Doc2Vec, Multilayer Perceptron with Backprop will be used
+# 	### Base Line Still Running
 # 
 # =========================================================================================================================
 # import requests
@@ -431,6 +432,12 @@ logging.basicConfig(format='%(asctime)s : %(levelname)s : %(message)s', level=lo
 # from sklearn.neural_network import MLPClassifier
 # from sklearn.neural_network import MLPRegressor
 # from sklearn.externals import joblib
+# from wordcut import Wordcut
+# if __name__ == '__main__':
+#     with open('bigthai.txt') as dict_file:
+#         word_list = list(set([w.rstrip() for w in dict_file.readlines()]))
+#         word_list.sort()
+#         wordcut = Wordcut(word_list)
 
 # def split_data(data,train_split=0.8):
 #     data = np.array(data)
@@ -443,7 +450,9 @@ logging.basicConfig(format='%(asctime)s : %(levelname)s : %(message)s', level=lo
 # r = r.json()
 # data = []
 # data_type = []
+# data_message = []
 # count = 0
+# escapes = ''.join([chr(char) for char in range(1, 32)])
 # for i in range(len(r)):
 # 	if 'vec' in r[i]:
 # 		vec = r[i]['vec']
@@ -454,25 +463,292 @@ logging.basicConfig(format='%(asctime)s : %(levelname)s : %(message)s', level=lo
 # 		typ = r[i]['type']
 # 		if typ == 'tmp':	
 # 			typ = r[i]['tmp_type']
-# 		if typ == 'review':
-# 			count +=1
+# 		count +=1
 # 		data_type.append(typ)
+# 		text = str(r[i]['message'])
+# 		data_message.append(text)
 
 # print(count)
 # training_data,test_data = split_data(data)
 # training_target,test_target = split_data(data_type)
+# training_message,test_message = split_data(data_message)
+# # fle = open('test_data','w')
+# # for i in range(len(test_message)):
+# # 	text = test_message[i]
+# # 	for j in range(len(escapes)):
+# # 		text = text.replace(escapes[j],"")
+# # 	fle.write(text+"\n")
+# # fle.close()
 # clf = MLPClassifier(solver='lbfgs', alpha=1e-5, hidden_layer_sizes=(300, 100), random_state=1,activation='logistic',max_iter=1000)
 # # clf = MLPRegressor(solver='lbfgs', alpha=1e-5, hidden_layer_sizes=(300, 100), random_state=1,activation='logistic',max_iter=1000)
 # clf.fit(training_data, training_target)
 # joblib.dump(clf, 'MLP_model.pkl')
 # # joblib.dump(clf, 'MLRegress_model.pkl')
 # results = clf.predict(test_data)
+# pos_correct = 0
+# f = open('test_data','r')
+# text_input = f.readlines()
+# f.close()
 # f = open('result_categorise_output','w')
 # for i in range(len(results)):
-# 	print(results[i]," >>> ",test_target[i])
+# 	if results[i] == test_target[i]:
+# 		pos_correct += 1
+# 	text_list = wordcut.tokenize(text_input[i])
+# 	print(text_input[i])
+# 	print(text_list)
+# 	print(results[i]," >>> ",test_target[i] + "\n")
+# 	f.write(text_input[i] + "\n")
+# 	for j in range(len(text_list) - 1):
+# 		f.write(text_list[j] + " ,")
+# 	f.write(text_list[-1])
+# 	f.write("\n")
 # 	f.write(str(results[i])+" >>> "+str(test_target[i])+"\n")
+
+# print("Accuracy :", str( float(pos_correct/len(test_target) )  )   )
+# f.write("Accuracy :" + str( float(pos_correct/len(test_target) )  )  )
 # f.close()
 # =========================================================================================================================
+
+
+
+
+
+# =========================================================================================================================
+# 
+# 	training neural network
+# 	for Doc2Vec, Decision tree will be used
+# 
+# =========================================================================================================================
+import requests
+import json
+import numpy as np
+import numpy.random as npr
+import math
+from sklearn import tree
+from sklearn.externals import joblib
+from wordcut import Wordcut
+if __name__ == '__main__':
+    with open('bigthai.txt') as dict_file:
+        word_list = list(set([w.rstrip() for w in dict_file.readlines()]))
+        word_list.sort()
+        wordcut = Wordcut(word_list)
+
+def split_data(data,train_split=0.8):
+    data = np.array(data)
+    num_train = int(data.shape[0] * train_split)
+    # npr.shuffle(data)
+    
+    return (data[:num_train],data[num_train:])
+
+r = requests.get("http://localhost:3000/get_data")
+r = r.json()
+data = []
+data_type = []
+count = 0
+for i in range(len(r)):
+	if 'vec' in r[i]:
+		vec = r[i]['vec']
+		vec = vec.split(",")
+		vec = np.array(vec, dtype=np.float64)
+		vec = vec.astype(np.float)
+		data.append(vec)
+		typ = r[i]['type']
+		if typ == 'tmp':	
+			typ = r[i]['tmp_type']
+		count +=1
+		data_type.append(typ)
+
+print(count)
+training_data,test_data = split_data(data)
+# clf = tree.DecisionTreeRegressor()
+# for i in range(len(data_type)):
+# 	if data_type[i] == 'news':
+# 		data_type[i] = 1
+# 	elif data_type[i] == 'advertisement':
+# 		data_type[i] = 2
+# 	elif data_type[i] == 'review':
+# 		data_type[i] = 3
+# 	elif data_type[i] == 'event':
+# 		data_type[i] = 4
+training_target,test_target = split_data(data_type)
+clf = tree.DecisionTreeClassifier()
+clf = clf.fit(training_data, training_target)
+joblib.dump(clf, 'DT_model.pkl')
+# joblib.dump(clf, 'DT_Regressor_model.pkl')
+results = clf.predict(test_data)
+pos_correct = 0
+f = open('test_data','r')
+text_input = f.readlines()
+f.close()
+
+# f = open('result_DT_Regressor_categorise_output','w')
+f = open('result_DT_categorise_output','w')
+for i in range(len(results)):
+	if results[i] == test_target[i]:
+		pos_correct += 1
+	text_list = wordcut.tokenize(text_input[i])
+	print(text_input[i])
+	print(text_list)
+	print(results[i]," >>> ",test_target[i] + "\n")
+	f.write(text_input[i] + "\n")
+	for j in range(len(text_list) - 1):
+		f.write(text_list[j] + " ,")
+	f.write(text_list[-1])
+	f.write("\n")
+	f.write(str(results[i])+" >>> "+str(test_target[i])+"\n\n\n")
+
+
+print("Accuracy :", str( float(pos_correct/len(test_target) )  )   )
+f.write("Accuracy :" + str( float(pos_correct/len(test_target) )  )  )
+f.close()
+# =========================================================================================================================
+
+
+
+
+# =========================================================================================================================
+# 
+# 	Testing for prediction
+# 	Prediction of DT model
+# 
+# =========================================================================================================================
+# import gensim
+# from sklearn import tree
+# from sklearn.externals import joblib
+# from wordcut import Wordcut
+# if __name__ == '__main__':
+#     with open('bigthai.txt') as dict_file:
+#         word_list = list(set([w.rstrip() for w in dict_file.readlines()]))
+#         word_list.sort()
+#         wordcut = Wordcut(word_list)
+
+
+# text = input("type your text :")
+# text = wordcut.tokenize(text)
+# print(text)
+# model = gensim.models.Doc2Vec.load('first_model')
+# vec = model.infer_vector(text)
+# clf = joblib.load('DT_model.pkl')
+# results = clf.predict(vec)
+# print("The prediction result is : ",results)
+# =========================================================================================================================
+
+
+
+
+
+
+# =========================================================================================================================
+# 
+# 	Testing for prediction
+# 	Prediction of Multilayer Perceptron model
+# 
+# =========================================================================================================================
+# import requests
+# import json
+# import gensim
+# import numpy as np
+# from sklearn.neural_network import MLPClassifier
+# from sklearn.externals import joblib
+# from wordcut import Wordcut
+# if __name__ == '__main__':
+#     with open('bigthai.txt') as dict_file:
+#         word_list = list(set([w.rstrip() for w in dict_file.readlines()]))
+#         word_list.sort()
+#         wordcut = Wordcut(word_list)
+
+# def split_data(data,train_split=0.8):
+#     data = np.array(data)
+#     num_train = int(data.shape[0] * train_split)
+#     # npr.shuffle(data)
+    
+#     return (data[:num_train],data[num_train:])
+
+# r = requests.get("http://localhost:3000/get_data")
+# r = r.json()
+# data = []
+# data_type = []
+# for i in range(len(r)):
+# 	if 'vec' in r[i]:
+# 		vec = r[i]['vec']
+# 		vec = vec.split(",")
+# 		vec = np.array(vec, dtype=np.float64)
+# 		vec = vec.astype(np.float)
+# 		data.append(vec)
+# 		typ = str(r[i]['type'])
+# 		if typ == 'tmp':
+# 			typ = str(r[i]['tmp_type'])
+# 		data_type.append(typ)
+
+# training_data,test_data = split_data(data)
+# training_target,test_target = split_data(data_type)
+# clf = MLPClassifier(solver='lbfgs', alpha=1e-5, hidden_layer_sizes=(300, 100), random_state=1,activation='logistic',max_iter=1000)
+# clf.fit(training_data, training_target)
+# text_input = input("type your text :")
+# text_list = wordcut.tokenize(text_input)
+# model = gensim.models.Doc2Vec.load('first_model')
+# vec = model.infer_vector(text_list)
+# print(text_list)
+# f = open('test_data','r')
+# text = f.readlines()
+# f.close()
+# f = open('test_test_input','w')
+# for i in range(len(text)):
+# 	f.write(text[i])
+# f.write(text_input+"\n")
+# f.close()
+# test_data += vec
+# # clf = joblib.load('MLP_model.pkl')
+# result = clf.predict(test_data)
+# results = clf.predict_proba(test_data)
+# print("The prediction result is : ",result[-1]," >>> ",results[-1])
+# =========================================================================================================================
+
+
+
+
+
+# results = clf.predict(test_data)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -487,8 +763,54 @@ logging.basicConfig(format='%(asctime)s : %(levelname)s : %(message)s', level=lo
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 # =========================================================================================================================
 # 
+# 	Base Line
 # 	Create Base Line Matrix
 # 	Matrix [num of data x num of word in model]
 # 
@@ -551,37 +873,38 @@ logging.basicConfig(format='%(asctime)s : %(levelname)s : %(message)s', level=lo
 
 # =========================================================================================================================
 # 
+# 	Base Line
 # 	Elbow method
 # 	CLustering K mean on base lie matrix
 # 
 # =========================================================================================================================
-import requests
-import json
-import numpy as np
-import math
-from sklearn.cluster import KMeans
-import matplotlib.pyplot as plt
-data = []
-r = requests.get("http://localhost:3000/get_data")
-r = r.json()
-for i in range(len(r)):
-	if 'vec_from_base_line' in r[i]:
-		vec = str(r[i]['vec_from_base_line'])
-		vec = vec.split(",")
-		vec = np.array(vec, dtype=np.float64)
-		vec = vec.astype(np.float)
-		data.append(vec)
+# import requests
+# import json
+# import numpy as np
+# import math
+# from sklearn.cluster import KMeans
+# import matplotlib.pyplot as plt
+# data = []
+# r = requests.get("http://localhost:3000/get_data")
+# r = r.json()
+# for i in range(len(r)):
+# 	if 'vec_from_base_line' in r[i]:
+# 		vec = str(r[i]['vec_from_base_line'])
+# 		vec = vec.split(",")
+# 		vec = np.array(vec, dtype=np.float64)
+# 		vec = vec.astype(np.float)
+# 		data.append(vec)
 
-sse = []
-for n_cluster in range(4, 150):
-    tmp = 0
-    print("n_cluster",n_cluster)
-    kmeans = KMeans(n_clusters=n_cluster,max_iter=1000).fit(data)
-    inter = kmeans.inertia_
-    sse.append(np.power(inter,2))
-plt.plot(sse)
-plt.ylabel('sse')
-plt.show()
+# sse = []
+# for n_cluster in range(4, 150):
+#     tmp = 0
+#     print("n_cluster",n_cluster)
+#     kmeans = KMeans(n_clusters=n_cluster,max_iter=1000).fit(data)
+#     inter = kmeans.inertia_
+#     sse.append(np.power(inter,2))
+# plt.plot(sse)
+# plt.ylabel('sse')
+# plt.show()
 # =========================================================================================================================
 
 
@@ -648,10 +971,10 @@ plt.show()
 # 		data_type.append(typ)
 
 # training_data,test_data = split_data(data)
-# f = open('result_k-mean_output_after_plot2','w')
+# f = open('result_base_line_k-mean_output_after_plot','w')
 # noc = []# number of cluster (40 ~ 100)
-# for i in range(31):
-# 	noc.append(50+i)
+# for i in range(41):
+# 	noc.append(60+i)
 # 	print(noc[i])
 # for i in range(31):
 # 	kmeans = cluster.KMeans(init='k-means++',n_clusters=noc[i],random_state=1,max_iter=1000)
@@ -695,4 +1018,238 @@ plt.show()
 
 # f.close()
 # =========================================================================================================================
+
+
+
+
+
+
+
+# =========================================================================================================================
+# 
+# 	Base Line
+# 	clustering k-mean
+# 	k = 80
+# 	assign temporary group of cluster to each sentense
+# 	For the unlabelable data, KNN will be used to find the nearest group
+# 	The number of data haven't beed grouped is 80 - num_of_grouped
+# 	record in database
+# 
+# =========================================================================================================================
+# import requests
+# import json
+# import numpy as np
+# import numpy.random as npr
+# from sklearn import cluster
+# from sklearn.neighbors import KNeighborsClassifier
+
+# r = requests.get("http://localhost:3000/get_data")
+# r = r.json()
+# data = []
+# data_id = []
+# data_message = []
+# data_type = []
+# advertisement = 0
+# news = 0
+# event = 0
+# review = 0
+
+# for i in range(len(r)):
+# 	if 'vec_from_base_line' in r[i]:
+# 		vec = r[i]['vec_from_base_line']
+# 		vec = vec.split(",")
+# 		vec = np.array(vec, dtype=np.float64)
+# 		vec = vec.astype(np.float)
+# 		data.append(vec)
+# 		typ = r[i]['type']
+# 		if typ == 'news':
+# 			news += 1
+# 		elif typ == 'advertisement':
+# 			advertisement += 1
+# 		elif typ == 'review':
+# 			review += 1
+# 		elif typ == 'event':
+# 			event += 1
+# 		data_id.append(r[i]['_id'])
+# 		data_message.append(r[i]['message'])
+# 		data_type.append(typ)
+
+# n_cluster = 80
+# kmeans = cluster.KMeans(init='k-means++',n_clusters=n_cluster,random_state=1,max_iter=1000)
+# km = kmeans.fit(data)
+# results = km.labels_
+# group_list = [[] for i in range(n_cluster)]
+# group_count = [0 for x in range(n_cluster)]
+# news_array = [0 for x in range(n_cluster)]
+# advertisement_array = [0 for x in range(n_cluster)]
+# review_array = [0 for x in range(n_cluster)]
+# event_array = [0 for x in range(n_cluster)]
+# for j in range(len(results)):
+# 	group_count[results[j]] += 1
+# 	group_list[results[j]].append(j)
+# 	if data_type[j] == 'news':
+# 		news_array[results[j]] += 1
+# 	elif data_type[j] == 'advertisement':
+# 		advertisement_array[results[j]] += 1
+# 	elif data_type[j] == 'review':
+# 		review_array[results[j]] += 1
+# 	elif data_type[j] == 'event':
+# 		event_array[results[j]] += 1
+
+# label_group = []
+# n_no_group = 0
+# for i in range(n_cluster):
+# 	my_list = []
+# 	my_list.extend([news_array[i],advertisement_array[i],review_array[i],event_array[i]])
+# 	max_value = max(my_list)
+# 	indices = [index for index, val in enumerate(my_list) if val == max_value]
+# 	if len(indices) != 1:
+# 		label_group.append('no_group')
+# 		n_no_group += 1
+# 	else:
+# 		if max_value == my_list[0]:
+# 			label_group.append('news')
+# 		elif max_value == my_list[1]:
+# 			label_group.append('advertisement')
+# 		elif max_value == my_list[2]:
+# 			label_group.append('review')
+# 		elif max_value == my_list[3]:
+# 			label_group.append('event')
+
+# print(n_no_group)
+# data_list_of_no_group = []
+# data_id_list_of_no_group = []
+# data_type_list_of_no_group = []
+# grouped_data = []
+# grouped_result = []
+# count = 0
+# for i in range(len(data)):
+# 	print("group : ",label_group[results[i]])
+# 	if label_group[results[i]] == 'no_group':
+# 		data_list_of_no_group.append(data[i])
+# 		data_id_list_of_no_group.append(data_id[i])
+# 		data_type_list_of_no_group.append(data_type[i])
+# 		count += 1
+# 		print("count value : ",count)
+# 	else:
+# 		grouped_data.append(data[i])
+# 		grouped_result.append(results[i])
+# 		re = requests.post("http://localhost:3000/get_data/edit_data", data={'id':data_id[i], 'base_line_type':label_group[results[i]]})
+# n_neighbor = n_cluster - n_no_group # number of no_group
+# neigh = KNeighborsClassifier(n_neighbors=n_neighbor) # using KNN to find the nearest group
+# neigh.fit(grouped_data, grouped_result)
+# neigh_results = neigh.predict(data_list_of_no_group)
+# for i in range(len(neigh_results)):
+# 	print(neigh_results[i]," >>> ",label_group[neigh_results[i]],"\n")
+# 	re = requests.post("http://localhost:3000/get_data/edit_data", data={'id':data_id_list_of_no_group[i], 'base_line_type':label_group[neigh_results[i]]})
+# =========================================================================================================================
+
+
+
+
+# =========================================================================================================================
+# 
+# 	Base Line
+# 	training neural network
+# 	for Doc2Vec, Normal neural network with Backprop will be used
+# 
+# =========================================================================================================================
+# import requests
+# import json
+# import numpy as np
+# import numpy.random as npr
+# import math
+# from sklearn.neural_network import MLPClassifier
+# from sklearn.neural_network import MLPRegressor
+# from sklearn.externals import joblib
+
+# def split_data(data,train_split=0.8):
+#     data = np.array(data)
+#     num_train = int(data.shape[0] * train_split)
+#     # npr.shuffle(data)
+    
+#     return (data[:num_train],data[num_train:])
+
+# r = requests.get("http://localhost:3000/get_data")
+# r = r.json()
+# data = []
+# data_type = []
+# count = 0
+# for i in range(len(r)):
+# 	if 'vec_from_base_line' in r[i]:
+# 		vec = r[i]['vec_from_base_line']
+# 		vec = vec.split(",")
+# 		vec = np.array(vec, dtype=np.float64)
+# 		vec = vec.astype(np.float)
+# 		data.append(vec)
+# 		typ = r[i]['type']
+# 		if typ == 'tmp':	
+# 			typ = r[i]['base_line_type']
+# 		count +=1
+# 		data_type.append(typ)
+
+# print(count)
+# training_data,test_data = split_data(data)
+# training_target,test_target = split_data(data_type)
+# clf = MLPClassifier(solver='lbfgs', alpha=1e-5, hidden_layer_sizes=(113, 100), random_state=1,activation='logistic',max_iter=1000)
+# # clf = MLPRegressor(solver='lbfgs', alpha=1e-5, hidden_layer_sizes=(300, 100), random_state=1,activation='logistic',max_iter=1000)
+# clf.fit(training_data, training_target)
+# joblib.dump(clf, 'Base_line_model.pkl')
+# # joblib.dump(clf, 'MLRegress_model.pkl')
+# results = clf.predict(test_data)
+# pos_correct = 0
+# f = open('result_base_line_output','w')
+# for i in range(len(results)):
+# 	if results[i] == test_target[i]:
+# 		pos_correct += 1
+# 	print(results[i]," >>> ",test_target[i])
+# 	f.write(str(results[i])+" >>> "+str(test_target[i])+"\n")
+
+# print("Accuracy :", str( float(pos_correct/len(test_target) )  )  )
+# f.write("Accuracy :" + str( float(pos_correct/len(test_target) )  )  )
+# f.close()
+# =========================================================================================================================
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+# import requests
+# import json
+# r = requests.get("http://localhost:3000/get_data")
+# r = r.json()
+# data_message = []
+# escapes = ''.join([chr(char) for char in range(1, 32)])
+# fle = open('test_word','w')
+# for i in range(len(r)):
+# 	text = str(r[i]['message'])
+# 	for j in range(len(escapes)):
+# 		text = text.replace(escapes[j],"")
+# 	fle.write(text+"\n")
+# fle.close()
+
+
+
+
+
 

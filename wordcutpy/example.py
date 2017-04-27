@@ -319,107 +319,107 @@ if __name__ == '__main__':
 # 	record in database
 # 
 # =========================================================================================================================
-import requests
-import json
-import numpy as np
-import numpy.random as npr
-from sklearn import cluster
-from sklearn.neighbors import KNeighborsClassifier
+# import requests
+# import json
+# import numpy as np
+# import numpy.random as npr
+# from sklearn import cluster
+# from sklearn.neighbors import KNeighborsClassifier
 
-r = requests.get("http://localhost:3000/get_data")
-r = r.json()
-data_vec = []
-data_vec_from_word = []
-data_id = []
-data_type = []
-data_tmp_type = []
+# r = requests.get("http://localhost:3000/get_data")
+# r = r.json()
+# data_vec = []
+# data_vec_from_word = []
+# data_id = []
+# data_type = []
+# data_tmp_type = []
 
-for i in range(len(r)):
-	if 'vec' in r[i] and 'vec_from_word' in r[i]:
-		vec = r[i]['vec']
-		vec = vec.split(",")
-		vec = np.array(vec, dtype=np.float64)
-		vec = vec.astype(np.float)
-		data_vec.append(vec)
-		vec_from_word = r[i]['vec_from_word']
-		vec_from_word = vec_from_word.split(',')
-		vec_from_word = np.array(vec_from_word, dtype=np.float64)
-		vec_from_word = vec_from_word.astype(np.float)
-		data_vec_from_word.append(vec_from_word)
-		data_id.append(r[i]['_id'])
-		data_type.append(r[i]['type'])
-		data_tmp_type.append(r[i]['tmp_type'])
+# for i in range(len(r)):
+# 	if 'vec' in r[i] and 'vec_from_word' in r[i]:
+# 		vec = r[i]['vec']
+# 		vec = vec.split(",")
+# 		vec = np.array(vec, dtype=np.float64)
+# 		vec = vec.astype(np.float)
+# 		data_vec.append(vec)
+# 		vec_from_word = r[i]['vec_from_word']
+# 		vec_from_word = vec_from_word.split(',')
+# 		vec_from_word = np.array(vec_from_word, dtype=np.float64)
+# 		vec_from_word = vec_from_word.astype(np.float)
+# 		data_vec_from_word.append(vec_from_word)
+# 		data_id.append(r[i]['_id'])
+# 		data_type.append(r[i]['type'])
+# 		data_tmp_type.append(r[i]['tmp_type'])
 
-n_cluster = 78
-kmeans = cluster.KMeans(init='k-means++',n_clusters=n_cluster,random_state=1,max_iter=1000)
-km = kmeans.fit(data_vec_from_word)
-results = km.labels_
-group_list = [[] for i in range(n_cluster)]
-group_count = [0 for x in range(n_cluster)]
-news_array = [0 for x in range(n_cluster)]
-advertisement_array = [0 for x in range(n_cluster)]
-review_array = [0 for x in range(n_cluster)]
-event_array = [0 for x in range(n_cluster)]
-for j in range(len(results)):
-	group_count[results[j]] += 1
-	group_list[results[j]].append(j)
-	if data_type[j] == 'news':
-		news_array[results[j]] += 1
-	elif data_type[j] == 'advertisement':
-		advertisement_array[results[j]] += 1
-	elif data_type[j] == 'review':
-		review_array[results[j]] += 1
-	elif data_type[j] == 'event':
-		event_array[results[j]] += 1
+# n_cluster = 78
+# kmeans = cluster.KMeans(init='k-means++',n_clusters=n_cluster,random_state=1,max_iter=1000)
+# km = kmeans.fit(data_vec_from_word)
+# results = km.labels_
+# group_list = [[] for i in range(n_cluster)]
+# group_count = [0 for x in range(n_cluster)]
+# news_array = [0 for x in range(n_cluster)]
+# advertisement_array = [0 for x in range(n_cluster)]
+# review_array = [0 for x in range(n_cluster)]
+# event_array = [0 for x in range(n_cluster)]
+# for j in range(len(results)):
+# 	group_count[results[j]] += 1
+# 	group_list[results[j]].append(j)
+# 	if data_type[j] == 'news':
+# 		news_array[results[j]] += 1
+# 	elif data_type[j] == 'advertisement':
+# 		advertisement_array[results[j]] += 1
+# 	elif data_type[j] == 'review':
+# 		review_array[results[j]] += 1
+# 	elif data_type[j] == 'event':
+# 		event_array[results[j]] += 1
 
-label_group = []
-n_no_group = 0
-for i in range(n_cluster):
-	my_list = []
-	my_list.extend([news_array[i],advertisement_array[i],review_array[i],event_array[i]])
-	max_value = max(my_list)
-	indices = [index for index, val in enumerate(my_list) if val == max_value]
-	if len(indices) != 1:
-		label_group.append('no_group')
-		n_no_group += 1
-	else:
-		if max_value == my_list[0]:
-			label_group.append('news')
-		elif max_value == my_list[1]:
-			label_group.append('advertisement')
-		elif max_value == my_list[2]:
-			label_group.append('review')
-		elif max_value == my_list[3]:
-			label_group.append('event')
+# label_group = []
+# n_no_group = 0
+# for i in range(n_cluster):
+# 	my_list = []
+# 	my_list.extend([news_array[i],advertisement_array[i],review_array[i],event_array[i]])
+# 	max_value = max(my_list)
+# 	indices = [index for index, val in enumerate(my_list) if val == max_value]
+# 	if len(indices) != 1:
+# 		label_group.append('no_group')
+# 		n_no_group += 1
+# 	else:
+# 		if max_value == my_list[0]:
+# 			label_group.append('news')
+# 		elif max_value == my_list[1]:
+# 			label_group.append('advertisement')
+# 		elif max_value == my_list[2]:
+# 			label_group.append('review')
+# 		elif max_value == my_list[3]:
+# 			label_group.append('event')
 
-print(n_no_group) # number of no_group
-data_vec_list_of_no_group = []
-data_vec_from_word_list_of_no_group = []
-data_id_list_of_no_group = []
-data_type_list_of_no_group = []
-data_tmp_type_list_of_no_group = []
-grouped_data = []
-grouped_result = []
-for i in range(len(data_vec_from_word)):
-	print("group : ",label_group[results[i]])
-	if label_group[results[i]] == 'no_group':
-		data_vec_list_of_no_group.append(data_vec[i])
-		data_vec_from_word_list_of_no_group.append(data_vec_from_word[i])
-		data_id_list_of_no_group.append(data_id[i])
-		data_type_list_of_no_group.append(data_type[i])
-		data_tmp_type_list_of_no_group.append(data_tmp_type[i])
-	else:
-		grouped_data.append(data_vec_from_word[i])
-		grouped_result.append(results[i])
-		re = requests.post("http://localhost:3000/get_data/edit_data", data={'id':data_id[i], 'type':data_type[i], 'vec':data_vec[i], 'tmp_type':data_tmp_type[i], 'vec_from_word':data_vec_from_word[i], 'tmp_type_from_word':label_group[results[i]]})
+# print(n_no_group) # number of no_group
+# data_vec_list_of_no_group = []
+# data_vec_from_word_list_of_no_group = []
+# data_id_list_of_no_group = []
+# data_type_list_of_no_group = []
+# data_tmp_type_list_of_no_group = []
+# grouped_data = []
+# grouped_result = []
+# for i in range(len(data_vec_from_word)):
+# 	print("group : ",label_group[results[i]])
+# 	if label_group[results[i]] == 'no_group':
+# 		data_vec_list_of_no_group.append(data_vec[i])
+# 		data_vec_from_word_list_of_no_group.append(data_vec_from_word[i])
+# 		data_id_list_of_no_group.append(data_id[i])
+# 		data_type_list_of_no_group.append(data_type[i])
+# 		data_tmp_type_list_of_no_group.append(data_tmp_type[i])
+# 	else:
+# 		grouped_data.append(data_vec_from_word[i])
+# 		grouped_result.append(results[i])
+# 		re = requests.post("http://localhost:3000/get_data/edit_data", data={'id':data_id[i], 'type':data_type[i], 'vec':data_vec[i], 'tmp_type':data_tmp_type[i], 'vec_from_word':data_vec_from_word[i], 'tmp_type_from_word':label_group[results[i]]})
 
-n_neighbor = n_cluster - n_no_group
-neigh = KNeighborsClassifier(n_neighbors=n_neighbor) # using KNN to find the nearest group
-neigh.fit(grouped_data, grouped_result)
-neigh_results = neigh.predict(data_vec_from_word_list_of_no_group)
-for i in range(len(neigh_results)):
-	print(neigh_results[i]," >>> ",label_group[neigh_results[i]],"\n")
-	re = requests.post("http://localhost:3000/get_data/edit_data", data={'id':data_id_list_of_no_group[i], 'type':data_type_list_of_no_group[i], 'vec':data_vec_list_of_no_group[i], 'tmp_type':data_tmp_type_list_of_no_group[i], 'vec_from_word':data_vec_from_word_list_of_no_group[i], 'tmp_type_from_word': label_group[neigh_results[i]]})
+# n_neighbor = n_cluster - n_no_group
+# neigh = KNeighborsClassifier(n_neighbors=n_neighbor) # using KNN to find the nearest group
+# neigh.fit(grouped_data, grouped_result)
+# neigh_results = neigh.predict(data_vec_from_word_list_of_no_group)
+# for i in range(len(neigh_results)):
+# 	print(neigh_results[i]," >>> ",label_group[neigh_results[i]],"\n")
+# 	re = requests.post("http://localhost:3000/get_data/edit_data", data={'id':data_id_list_of_no_group[i], 'type':data_type_list_of_no_group[i], 'vec':data_vec_list_of_no_group[i], 'tmp_type':data_tmp_type_list_of_no_group[i], 'vec_from_word':data_vec_from_word_list_of_no_group[i], 'tmp_type_from_word': label_group[neigh_results[i]]})
 # =========================================================================================================================
 
 
@@ -428,9 +428,8 @@ for i in range(len(neigh_results)):
 
 # =========================================================================================================================
 # 
-# 	clustering k-mean (k == 4) 
-# 	save some example output to text file
-# 	assign temporary to each status in database
+# 	training neural network
+# 	for Doc2Vec, Normal neural network with Backprop will be used
 # 
 # =========================================================================================================================
 # import requests
@@ -438,7 +437,9 @@ for i in range(len(neigh_results)):
 # import numpy as np
 # import numpy.random as npr
 # import math
-# from sklearn import cluster
+# from sklearn.neural_network import MLPClassifier
+# from sklearn.neural_network import MLPRegressor
+# from sklearn.externals import joblib
 
 # def split_data(data,train_split=0.8):
 #     data = np.array(data)
@@ -447,108 +448,79 @@ for i in range(len(neigh_results)):
     
 #     return (data[:num_train],data[num_train:])
 
-
 # r = requests.get("http://localhost:3000/get_data")
 # r = r.json()
-# count = 0
 # data = []
-# data_id = []
-# data_message = []
 # data_type = []
-# advertisement = 0
-# news = 0
-# event = 0
-# review = 0
-# f = open('result_k-mean_output','w')
+# count = 0
 # for i in range(len(r)):
-# 	if 'vec' in r[i]:
-# 		count += 1
-# 		# print(count)
-# 		vec = r[i]['vec']
+# 	if 'vec_from_word' in r[i]:
+# 		vec = r[i]['vec_from_word']
 # 		vec = vec.split(",")
 # 		vec = np.array(vec, dtype=np.float64)
 # 		vec = vec.astype(np.float)
 # 		data.append(vec)
 # 		typ = r[i]['type']
-# 		if typ == 'news':
-# 			news += 1
-# 		elif typ == 'advertisement':
-# 			advertisement += 1
-# 		elif typ == 'review':
-# 			review += 1
-# 		elif typ == 'event':
-# 			event += 1
-# 		# how to know the owner of the vector (which sentence is for which vector)
-# 		data_id.append(r[i]['_id'])
-# 		data_message.append(r[i]['message'])
+# 		if typ == 'tmp':	
+# 			typ = r[i]['tmp_type_from_word']
+# 		count +=1
 # 		data_type.append(typ)
+
+# print(count)
 # training_data,test_data = split_data(data)
-
-# kmeans = cluster.KMeans(n_clusters=4)
-# kmeans.fit(data)
-# results = kmeans.predict(data)
-# group_count = [0,0,0,0]
-# group_list = [[],[],[],[]]
+# training_target,test_target = split_data(data_type)
+# clf = MLPClassifier(solver='lbfgs', alpha=1e-5, hidden_layer_sizes=(300, 100), random_state=1,activation='logistic',max_iter=1000)
+# # clf = MLPRegressor(solver='lbfgs', alpha=1e-5, hidden_layer_sizes=(300, 100), random_state=1,activation='logistic',max_iter=1000)
+# clf.fit(training_data, training_target)
+# joblib.dump(clf, 'MLP_word_model.pkl')
+# # joblib.dump(clf, 'MLRegress_model.pkl')
+# results = clf.predict(test_data)
+# pos_correct = 0
+# f = open('result_word2vec_output','w')
 # for i in range(len(results)):
-# 	group_count[results[i]] += 1
-# 	group_list[results[i]].append(i)
+# 	if results[i] == test_target[i]:
+# 		pos_correct += 1
+# 	print(results[i]," >>> ",test_target[i])
+# 	f.write(str(results[i])+" >>> "+str(test_target[i])+"\n")
 
-# print(group_count)
-# print("news : ",news," >>> advertisement : ",advertisement," >>> review : ",review," >>> event : ",event)
-# news_array = [0,0,0,0]
-# news_position = 0
-# advertisement_array = [0,0,0,0]
-# advertisement_position = 0
-# review_array = [0,0,0,0]
-# review_position = 0
-# event_array = [0,0,0,0]
-# event_position = 0
-
-# for i in range(len(data_type)):
-# 	if data_type[i] == 'news':
-# 		news_array[results[i]] += 1
-# 		news_position = results[i]
-# 	elif data_type[i] == 'advertisement':
-# 		advertisement_array[results[i]] += 1
-# 		advertisement_position = results[i]
-# 	elif data_type[i] == 'review':
-# 		review_array[results[i]] += 1
-# 		review_position = results[i]
-# 	elif data_type[i] == 'event':
-# 		event_array[results[i]] += 1
-# 		event_position = results[i]
-
-# # ================================================================================
-# # tmp_type = {}
-# # for i in range(4):
-# # 	mx = max(news_array[i],advertisement_array[i],review_array[i],event_array[i])
-# # 	if mx == news_array[i]:
-# # 		tmp_type[news_position] = 'news'
-# # 	elif mx == advertisement_array[i]:
-# # 		tmp_type[advertisement_position] = 'advertisement'
-# # 	elif mx == review_array[i]:
-# # 		tmp_type[review_position] = 'review'
-# # 	elif mx == event_array[i]:
-# # 		tmp_type[event_position] = 'event'
-# # 	# print(tmp_type[results[i]])
-# # print(tmp_type[0])	
-# # ================================================================================
-
-# print("news in 0 : ",news_array[0]," >>> advertisement in 0 : ",advertisement_array[0]," >>> review in 0 : ",review_array[0]," >>> event in 0 : ",event_array[0])
-# print('\n')
-# print("news in 1 : ",news_array[1]," >>> advertisement in 1 : ",advertisement_array[1]," >>> review in 1 : ",review_array[1]," >>> event in 1 : ",event_array[1])
-# print('\n')
-# print("news in 2 : ",news_array[2]," >>> advertisement in 2 : ",advertisement_array[2]," >>> review in 2 : ",review_array[2]," >>> event in 2 : ",event_array[2])
-# print('\n')
-# print("news in 3 : ",news_array[3]," >>> advertisement in 3 : ",advertisement_array[3]," >>> review in 3 : ",review_array[3]," >>> event in 3 : ",event_array[3])
-# print('\n')
-
-# for i in range(len(results)):
-# 	print("results ",i," : ",results[i]," >>> type : ",data_type[i]," >>> message : ",data_message[i],"\n\n\n")
-# 	f.write("results " + str(i) + " : " + str(results[i]) + " >>> type : " + data_type[i] + " >>> message : " + data_message[i] + "\n\n\n")
-# # 	re = requests.post("http://localhost:3000/get_data/edit_data", data={'id':data_id[i], 'type':data_type[i], 'vec':data[i], 'tmp_type':tmp_type[results[i]]})
+# print("Accuracy :", str( float(pos_correct/len(test_target) )  )   )
+# f.write("Accuracy :" + str( float(pos_correct/len(test_target) )  )  )
 # f.close()
-
-# print("kmeans.predict(test_data) : ",kmeans.predict(test_data))
 # =========================================================================================================================
+
+
+
+
+
+
+
+
+import gensim
+from sklearn import tree
+from sklearn.externals import joblib
+from wordcut import Wordcut
+if __name__ == '__main__':
+    with open('bigthai.txt') as dict_file:
+        word_list = list(set([w.rstrip() for w in dict_file.readlines()]))
+        word_list.sort()
+        wordcut = Wordcut(word_list)
+
+
+text = input("type your text :")
+text = wordcut.tokenize(text)
+print(text)
+model = gensim.models.Word2Vec.load('fifth_model')
+vec = [0 for x in range(300)]
+for i in range(len(text)):
+	vec += model[text[i]]
+clf = joblib.load('MLP_word_model.pkl')
+results = clf.predict(vec)
+print("The prediction result is : ",results)
+
+
+
+
+
+
+
 

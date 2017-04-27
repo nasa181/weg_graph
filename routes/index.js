@@ -566,10 +566,10 @@ router.get('/get_data',function(req,res){
 
 router.get('/get_data/edit_data',function(req,res){
 	Message.find({
-		// type: { $in: ['news', 'review', 'advertisement', 'event'], $nin:['tmp'] }
+		// type: { $nin: ['news', 'review', 'advertisement', 'event'] }
 		// message:/.*อาหาร.*/
 		type:{$in : ['tmp']},
-		tmp_type:{ $nin: ['news', 'review', 'advertisement', 'event'] }
+		// tmp_type:{ $nin: ['news', 'review', 'advertisement', 'event'] }
 	})
 	// .limit(600)
 	.then(
@@ -597,13 +597,14 @@ router.post('/get_data/edit_data',function(req,res){
 			// message.tmp_type_from_word = req.body.tmp_type_from_word;
 			// message.vec_from_word = req.body.vec_from_word;
 			message.vec_from_base_line = req.body.vec_from_base_line;
+			// message.base_line_type = req.body.base_line_type;
 			message.save().then(function(message){
-				                // res.redirect('/get_data/edit_data');
-				                res.status(200).send({
-				                	success: true,
-				                	status: 'update data complete',
-				                	message: 'update data complete'
-				                })
+				                res.redirect('/get_data/edit_data');
+				                // res.status(200).send({
+				                // 	success: true,
+				                // 	status: 'update data complete',
+				                // 	message: 'update data complete'
+				                // })
 				            },function(err){
 				                res.status(400).send({
 									success: false,
